@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakods Shoes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="woman.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body>
+
+    <header id="header">
+        <a href="#"><img src="../MainPage/logo/logo.png" class="logo" alt=""></a>
+
+        <div class="menu-icon" onclick="toggleMenu()">
+            <i class="fa fa-bars" aria-hidden="true"></i>
+        </div>
+
+        <ul id="navbar" class="show">
+            <div id="close-btn" onclick="toggleMenu()">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <li><a href="../MainPage/index.html">Ana Sayfa</a></li>
+            <li><a href="../ProductPage/man.html">Erkek Ayakkabı</a></li>
+            <li><a href="../ProductPage/woman.html">Kadın Ayakkabı</a></li>
+            <li><a href="../ProductPage/child.html">Çocuk Ayakkabı</a></li>
+            <li><a href="../MainPage/who.html">Biz Kimiz ?</a></li>
+            <li><a href="../MainPage/contact.html">İletişim</a></li>
+            <li><a href=""><i class="fa fa-shopping-bag" aria-hidden="true"></i></a></li>
+        </ul>
+    </header>
+    <section id="hero">
+        <div class="filter-section">
+            <h2>Marka Filtreleme</h2>
+            <div class="brand-filter">
+                <label for="brand-nike">
+                    <input type="radio" id="brand-nike" name="brand" value="Nike">
+                    Nike
+                </label>
+            </div>
+            <div class="brand-filter">
+                <label for="brand-adidas">
+                    <input type="radio" id="brand-adidas" name="brand" value="Adidas">
+                    Adidas
+                </label>
+            </div>
+            <div class="brand-filter">
+                <label for="brand-adidas">
+                    <input type="radio" id="brand-adidas" name="brand" value="Vans">
+                    Vans
+                </label>
+            </div>
+            <div class="brand-filter">
+                <label for="brand-adidas">
+                    <input type="radio" id="brand-adidas" name="brand" value="Puma">
+                    Puma
+                </label>
+            </div>
+            <!-- Diğer markaları ekleyin -->
+            <button id="filterButton">Filtrele</button>
+        </div>
+        <div id="shoes-container" class="ayakkabi"></div>
+        </div>
+    </section>
+
+</body>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAriMIe1AwyethfXRjra_Rrna68DXYH3Oc",
+        authDomain: "auth-b9ba9.firebaseapp.com",
+        databaseURL: "https://auth-b9ba9-default-rtdb.firebaseio.com",
+        projectId: "auth-b9ba9",
+        storageBucket: "auth-b9ba9.appspot.com",
+        messagingSenderId: "463113484478",
+        appId: "1:463113484478:web:ec4089f598083d13fb86ef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const fetchShoesData = () => {
+        const shoesCollection = collection(db, 'AyakkabılarKadın');
+        const shoesContainer = document.getElementById('shoes-container');
+
+        getDocs(shoesCollection)
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+
+                    // Her ayakkabı için bir liste öğesi oluştur
+                    const shoeItem = document.createElement('div');
+                    shoeItem.className = 'shoe-item';
+
+                    // Ayakkabı resmini ekle
+                    const imgElement = document.createElement('img');
+                    imgElement.src = data.imageUrl;
+                    imgElement.alt = 'Ayakkabı Resmi';
+                    imgElement.style.width = '150px';
+                    imgElement.style.height = '150px';
+                    shoeItem.appendChild(imgElement);
+
+                    // Ayakkabı detaylarını ekle
+                    const shoeDetails = document.createElement('div');
+                    shoeDetails.className = 'shoe-details';
+                    shoeDetails.innerHTML = `
+                            <p>Fiyat: ${data.fiyat}</p>
+                            <p>Marka: ${data.marka}</p>
+                            <p>Model: ${data.model}</p>
+                            <button class="buy-button">Satın Al</button>
+                        `;
+                    shoeItem.appendChild(shoeDetails);
+
+                    // Ayakkabıyı sayfaya ekle
+                    shoesContainer.appendChild(shoeItem);
+                });
+            })
+            .catch((error) => {
+                console.error('Ayakkabı bilgilerini çekerken bir hata oluştu:', error);
+            });
+    };
+    const filterShoesByBrand = (brand) => {
+        const shoesCollection = collection(db, 'AyakkabılarKadın');
+        const shoesContainer = document.getElementById('shoes-container');
+
+        // Sayfayı temizle
+        shoesContainer.innerHTML = '';
+
+        // Markaya göre sorgu
+        const q = brand
+            ? query(collection(db, 'AyakkabılarKadın'), where('marka', '==', brand))
+            : shoesCollection;
+
+        // Sorguyu gerçekleştir
+        getDocs(q)
+            .then((querySnapshot) => {
+                console.log('Firestore Verileri:', querySnapshot.docs.map(doc => doc.data()));
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+
+                    // Ayakkabıyı sayfaya ekleme kısmı (yukarıdaki kod ile aynı)
+                    const shoeItem = document.createElement('div');
+                    shoeItem.className = 'shoe-item';
+
+                    const imgElement = document.createElement('img');
+                    imgElement.src = data.imageUrl;
+                    imgElement.alt = 'Ayakkabı Resmi';
+                    imgElement.style.width = '150px';
+                    imgElement.style.height = '150px';
+                    shoeItem.appendChild(imgElement);
+
+                    const shoeDetails = document.createElement('div');
+                    shoeDetails.className = 'shoe-details';
+                    shoeDetails.innerHTML = `
+                            <p>Fiyat: ${data.fiyat}</p>
+                            <p>Marka: ${data.marka}</p>
+                            <p>Model: ${data.model}</p>
+                            <button class="buy-button">Satın Al</button>
+                        `;
+                    shoeItem.appendChild(shoeDetails);
+
+                    shoesContainer.appendChild(shoeItem);
+                });
+            })
+            .catch((error) => {
+                console.error('Ayakkabı filtrelenirken bir hata oluştu:', error);
+            });
+    };
+    const buyShoe = (shoeData) => {
+        // Kartı görünür hale getir
+        document.getElementById('cart').style.display = 'block';
+
+        // Kart detaylarını güncelle
+        document.getElementById('cartDetails').innerHTML = `
+                <img src="${shoeData.imageUrl}" alt="Satın Alınan Ayakkabı">
+                <p>Fiyat: ${shoeData.fiyat}</p>
+                <p>Marka: ${shoeData.marka}</p>
+                <p>Model: ${shoeData.model}</p>
+            `;
+    };
+    const closeCart = () => {
+        document.getElementById('cart').style.display = 'none';
+    };
+
+     window.onload = async () => {
+            await fetchShoesData(); // Ayakkabı verilerini çek ve sayfaya ekle
+
+            document.getElementById('filterButton').addEventListener('click', () => {
+                const selectedBrand = document.querySelector('input[name="brand"]:checked');
+                const selectedBrandValue = selectedBrand ? selectedBrand.value : null;
+
+                console.log('Seçilen Marka:', selectedBrandValue);
+
+                // Seçilen markayı kullanarak Firestore sorgusu yapın
+                filterShoesByBrand(selectedBrandValue);
+            });
+
+            // Her satın al butonuna click event listener ekle
+            const buyButtons = document.querySelectorAll('.buy-button');
+            buyButtons.forEach((button) => {
+                button.addEventListener('click', (event) => {
+                    const shoeItem = event.target.closest('.shoe-item');
+                    const shoeData = {
+                        imageUrl: shoeItem.querySelector('img').src,
+                        fiyat: shoeItem.querySelector('.shoe-details p:nth-child(1)').textContent.replace('Fiyat: ', ''),
+                        marka: shoeItem.querySelector('.shoe-details p:nth-child(2)').textContent.replace('Marka: ', ''),
+                        model: shoeItem.querySelector('.shoe-details p:nth-child(3)').textContent.replace('Model: ', ''),
+                    };
+
+                    buyShoe(shoeData);
+                });
+            });
+        };
+</script>
+<script src="./woman.js"></script>
+
+</html>

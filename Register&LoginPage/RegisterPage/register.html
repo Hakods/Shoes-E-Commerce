@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üye Ol</title>
+    <link rel="stylesheet" href="./register.css">
+</head>
+
+<body>
+
+    <section class="container">
+
+        <header>Üye Ol</header>
+
+        <form action="" class="form" id="contactForm">
+            <!-- Ad ve Soyad -->
+            <div class="input-box">
+                <label>Ad Soyad</label>
+                <input type="text" id="nameid" required>
+            </div>
+            <!-- E-Mail -->
+            <div class="input-box">
+                <label id="email-label">E-Mail</label>
+                <input type="email" id="emailid" onclick="validateEmail()" required>
+                <span id="email-error"> </span>
+            </div>
+            <!-- Telefon Numarası ve Doğum Tarihi -->
+            <div class="column">
+                <div class="input-box">
+                    <label>Telefon Numarası</label>
+                    <input type="number" id="numberid" required />
+                </div>
+                <div class="input-box">
+                    <label>Doğum Tarihi</label>
+                    <input type="date" id="dateid" required />
+                </div>
+            </div>
+            <!-- Şifre -->
+            <div class="input-box">
+                <label>Şifre</label>
+                <input type="password" id="password_id" required>
+                <span class="eye-icon">
+                    <img src="eye-close.png" alt="" id="eyeicon">
+                </span>
+                <p id="message">Şifreniz <span id="strength"></span></p>
+            </div>
+            <!-- Cinsiyet -->
+            <div class="gender-box">
+                <h3>Cinsiyet</h3>
+                <div class="gender-option" id="genderid">
+                    <div class="gender">
+                        <input type="radio" id="check-male" name="gender" required>
+                        <label for="check-male">Erkek</label>
+                    </div>
+                    <div class="gender">
+                        <input type="radio" id="check-female" name="gender">
+                        <label for="check-female">Kadın</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" id="RegisterButton">Üye Ol</button>
+        </form>
+        <h4 id="h4">Zaten üye misiniz? O zaman <span id="span1"><a href="../LoginPage/login.html">giriş
+                    yapın</a></span> </h4>
+    </section>
+
+
+    <script src="./register.js"></script>
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAriMIe1AwyethfXRjra_Rrna68DXYH3Oc",
+            authDomain: "auth-b9ba9.firebaseapp.com",
+            projectId: "auth-b9ba9",
+            storageBucket: "auth-b9ba9.appspot.com",
+            messagingSenderId: "463113484478",
+            appId: "1:463113484478:web:ec4089f598083d13fb86ef"
+        };
+
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
+
+
+        const RegisterButton = document.getElementById("RegisterButton");
+
+        RegisterButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Formun default davranışını engelle
+
+            var eMailInp = document.getElementById("emailid").value;
+            var passwordInp = document.getElementById("password_id").value;
+            var nameInp = document.getElementById("nameid").value;
+            var phoneInp = document.getElementById("numberid").value;
+            var dateInp = document.getElementById("dateid").value;
+            var genderInp = document.getElementById("check-male").value;
+
+
+            let gucluSifre = GucluSifre(passwordInp);
+            var genderInp;
+            var maleRadioButton = document.getElementById("check-male");
+            if (maleRadioButton.checked) {
+                genderInp = "Erkek";
+            } else {
+                genderInp = "Kadın";
+            }
+            if (!validateEmail(eMailInp)) {
+                alert("Lütfen geçerli bir e-posta giriniz.");
+            } else if (gucluSifre <= 2) {
+                alert("Şifre zayıf, lütfen daha güçlü bir şifre kullanın.");
+            } else if (gucluSifre >= 2 && gucluSifre <= 4) {
+                alert("Şifre orta, lütfen daha güçlü bir şifre kullanın.");
+            } else {
+                createUserWithEmailAndPassword(auth, eMailInp, passwordInp)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        set(ref(database, 'users/' + user.uid), {
+                            nameInp: nameInp,
+                            eMailInp: eMailInp,
+                            passwordInp: passwordInp,
+                            phoneInp: phoneInp,
+                            dateInp: dateInp,
+                            genderInp: genderInp
+                        })
+                            .then(() => {
+                                alert("Kullanıcı başarıyla kayıt oldu.");
+                                window.location.href = "../LoginPage/login.html";
+                            })
+                            .catch((error) => {
+                                alert(error);
+                            })
+
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        alert(errorMessage);
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>

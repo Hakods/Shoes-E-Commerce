@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap</title>
+    <link rel="stylesheet" href="./login.css">
+</head>
+
+<body>
+
+    <section class="container">
+
+        <header>Giriş Yap</header>
+
+        <form action="" class="form">
+            <!-- E-Mail -->
+            <div class="input-box">
+                <label>E-Mail</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <!-- Şifre -->
+            <div class="input-box">
+                <label>Şifre</label>
+                <input type="password" id="password" required>
+                <span class="eye-icon">
+                    <img src="eye-close.png" alt="" id="eyeicon">
+                </span>
+            </div>
+            <button type="submit" id="loginButton">Giriş Yap</button>
+        </form>
+        <h4 id="h4">Henüz üye değil misiniz? O zaman <span id="span1"><a href="../RegisterPage/register.html">üye
+                    olun</a></span> </h4>
+    </section>
+    <script src="login.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, set, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAriMIe1AwyethfXRjra_Rrna68DXYH3Oc",
+            authDomain: "auth-b9ba9.firebaseapp.com",
+            projectId: "auth-b9ba9",
+            storageBucket: "auth-b9ba9.appspot.com",
+            messagingSenderId: "463113484478",
+            appId: "1:463113484478:web:ec4089f598083d13fb86ef"
+        };
+
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
+
+        const LoginButton = document.getElementById("loginButton");
+
+        LoginButton.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            var eMailInp = document.getElementById("email").value;
+            var passwordInp = document.getElementById("password").value;
+
+            // Firebase Authentication ile üye girişi yapma
+            signInWithEmailAndPassword(auth, eMailInp, passwordInp)
+                .then((userCredential) => {
+                    // Giriş başarılıysa
+                    const user = userCredential.user;
+                    const dt = new Date();
+                    const formattedDate = dt.toISOString(); // Tarihi bir dizeye çevir
+
+                    update(ref(database, 'users/' + user.uid), {
+                        last_login: formattedDate
+                    })
+                        .then(() => {
+                            alert("Kullanıcı başarıyla giriş yaptı.");
+                            window.location.href = "../../MainPage/index.html";
+                        })
+                        .catch((error) => {
+                            alert(error);
+                        })
+                })
+                .catch((error) => {
+                    // Giriş başarısızsa
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage);
+                });
+        });
+    </script>
+</body>
+
+</html>

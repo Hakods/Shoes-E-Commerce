@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakods Shoes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body>
+
+    <header id="header">
+        <a href="#"><img src="./logo/logo.png" class="logo" alt=""></a>
+
+        <div class="menu-icon" onclick="toggleMenu()">
+            <i class="fa fa-bars" aria-hidden="true"></i>
+        </div>
+
+        <ul id="navbar" class="show">
+            <div id="close-btn" onclick="toggleMenu()">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <li><a href="../MainPage/index.html">Ana Sayfa</a></li>
+            <li><a href="../ProductPage/man.html">Erkek Ayakkabı</a></li>
+            <li><a href="../ProductPage/woman.html">Kadın Ayakkabı</a></li>
+            <li><a href="../ProductPage/child.html">Çocuk Ayakkabı</a></li>
+            <li><a href="../MainPage/who.html">Biz Kimiz ?</a></li>
+            <li><a href="../MainPage/contact.html">İletişim</a></li>
+            <li><a href=""><i class="fa fa-shopping-bag" aria-hidden="true"></i></a></li>
+        </ul>
+    </header>
+    <section id="hero">
+        <div class="image-container" id="photoContainer">
+
+        </div>
+    </section>
+
+
+</body>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAriMIe1AwyethfXRjra_Rrna68DXYH3Oc",
+        authDomain: "auth-b9ba9.firebaseapp.com",
+        databaseURL: "https://auth-b9ba9-default-rtdb.firebaseio.com",
+        projectId: "auth-b9ba9",
+        storageBucket: "auth-b9ba9.appspot.com",
+        messagingSenderId: "463113484478",
+        appId: "1:463113484478:web:ec4089f598083d13fb86ef"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage();
+
+    var storageRef = ref(storage, 'mainpageimages'); // 'images' kısmını kendi depolama klasörünüze uygun olarak değiştirin
+
+    var photoContainer = document.getElementById('photoContainer');
+
+    listAll(storageRef).then(function (result) {
+        result.items.forEach(function (itemRef, index) {
+            getDownloadURL(itemRef).then(function (url) {
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = "Resim " + (index + 1);
+
+                var a = document.createElement('a');
+                a.href = "../ProductPage/" + getImageType(index) + ".html"; // getImageType fonksiyonuyla alakalı detay aşağıda
+
+                a.appendChild(img);
+                photoContainer.appendChild(a);
+            });
+        });
+    }).catch(function (error) {
+        console.error('Hata:', error);
+    });
+
+    function getImageType(index) {
+        switch (index) {
+            case 0:
+                return "child";
+            case 1:
+                return "man";
+            case 2:
+                return "woman";
+            default:
+                return "";
+        }
+    }
+</script>
+<script src="./index.js"></script>
+
+</html>
