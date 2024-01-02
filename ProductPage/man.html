@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script type="module" src="./man.js" async></script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="man.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script>
+        // Menüyü açıp kapatma fonksiyonu
+        function toggleMenu() {
+            var navbar = document.getElementById('navbar');
+            navbar.classList.toggle('show');
+        }
+    </script>
+    <script type="module">
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const shoppingInfoContainer = document.getElementById('shoppingInfoContainer');
+        let productData;
+
+        
+        // Alışveriş sepeti işlemleri
+        async function getShoppingCartItems() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'Ayakkabılar'));
+                const items = [];
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    items.push(data);
+                });
+
+                return items;
+            } catch (error) {
+                console.error('Alışveriş sepeti ürünleri çekerken bir hata oluştu:', error);
+            }
+        }
+        
+        // function closeShoppingCartModal() {
+        //     shoppingCartModal.style.display = 'none'; // Alışveriş sepeti modalını kapat
+        // }
+        function updateShoppingCart(fiyat, marka, model, imageUrl) {
+            try {
+                const shoppingInfoContainer = document.getElementById('shoppingInfoContainer');
+
+                if (shoppingInfoContainer) {
+                    const newItemContainer = document.createElement('div');
+                    newItemContainer.className = 'shopping-cart-item';
+
+                    // Ayakkabı resmi
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imageUrl;
+                    imgElement.alt = 'Ayakkabı Resmi';
+                    imgElement.style.width = '50px';
+                    imgElement.style.height = '50px';
+                    newItemContainer.appendChild(imgElement);
+
+                    // Ayakkabı bilgileri
+                    const itemDetails = document.createElement('div');
+                    itemDetails.className = 'item-details';
+                    itemDetails.innerHTML = `
+                <p>Fiyat: ${fiyat}</p>
+                <p>Marka: ${marka}</p>
+                <p>Model: ${model}</p>
+            `;
+                    newItemContainer.appendChild(itemDetails);
+
+                    shoppingInfoContainer.appendChild(newItemContainer);
+                } else {
+                    console.error('Alışveriş sepeti bilgi containerı bulunamadı. HTML yapısını kontrol edin.');
+                }
+            } catch (error) {
+                console.error('Alışveriş sepeti güncellenirken bir hata oluştu:', error);
+            }
+        }
+        
+    </script>
 </head>
 
 <body>
@@ -32,7 +103,10 @@
             <li><a href="../ProductPage/child.html">Çocuk Ayakkabı</a></li>
             <li><a href="../MainPage/who.html">Biz Kimiz ?</a></li>
             <li><a href="../MainPage/contact.html">İletişim</a></li>
-            <li><a href=""><i class="fa fa-shopping-bag" aria-hidden="true"></i></a></li>
+            <button class="shoppingCartButton" onclick="openShoppingCartModal()">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" data-count="0"></span>
+            </button>
         </ul>
     </header>
     <section id="hero">
@@ -40,158 +114,41 @@
             <h2>Marka Filtreleme</h2>
             <div class="brand-filter">
                 <label for="brand-nike">
-                    <input type="radio" id="brand-nike" name="brand" value="Nike">
+                    <input type="radio" id="brand-nike" name="marka" value="Nike">
                     Nike
                 </label>
             </div>
             <div class="brand-filter">
                 <label for="brand-adidas">
-                    <input type="radio" id="brand-adidas" name="brand" value="Adidas">
+                    <input type="radio" id="brand-adidas" name="marka" value="Adidas">
                     Adidas
                 </label>
             </div>
             <div class="brand-filter">
                 <label for="brand-adidas">
-                    <input type="radio" id="brand-adidas" name="brand" value="Vans">
+                    <input type="radio" id="brand-adidas" name="marka" value="Vans">
                     Vans
                 </label>
             </div>
             <div class="brand-filter">
                 <label for="brand-adidas">
-                    <input type="radio" id="brand-adidas" name="brand" value="Puma">
+                    <input type="radio" id="brand-adidas" name="marka" value="Puma">
                     Puma
                 </label>
-            </div> 
+            </div>
             <!-- Diğer markaları ekleyin -->
             <button id="filterButton">Filtrele</button>
         </div>
         <div id="shoes-container" class="ayakkabi"></div>
         </div>
     </section>
+    <div id="shoppingCartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeShoppingCartModal()">&times;</span>
+            <h2>Alışveriş Sepeti</h2>
+            <div id="shoppingInfoContainer"></div>
+        </div>
+    </div>
 
 </body>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAriMIe1AwyethfXRjra_Rrna68DXYH3Oc",
-        authDomain: "auth-b9ba9.firebaseapp.com",
-        databaseURL: "https://auth-b9ba9-default-rtdb.firebaseio.com",
-        projectId: "auth-b9ba9",
-        storageBucket: "auth-b9ba9.appspot.com",
-        messagingSenderId: "463113484478",
-        appId: "1:463113484478:web:ec4089f598083d13fb86ef"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const fetchShoesData = () => {
-        const shoesCollection = collection(db, 'Ayakkabılar');
-        const shoesContainer = document.getElementById('shoes-container');
-
-        getDocs(shoesCollection)
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-
-                    // Her ayakkabı için bir liste öğesi oluştur
-                    const shoeItem = document.createElement('div');
-                    shoeItem.className = 'shoe-item';
-
-                    // Ayakkabı resmini ekle
-                    const imgElement = document.createElement('img');
-                    imgElement.src = data.imageUrl;
-                    imgElement.alt = 'Ayakkabı Resmi';
-                    imgElement.style.width = '150px';
-                    imgElement.style.height = '150px';
-                    shoeItem.appendChild(imgElement);
-
-                    // Ayakkabı detaylarını ekle
-                    const shoeDetails = document.createElement('div');
-                    shoeDetails.className = 'shoe-details';
-                    shoeDetails.innerHTML = `
-                            <p>Fiyat: ${data.fiyat}</p>
-                            <p>Marka: ${data.marka}</p>
-                            <p>Model: ${data.model}</p>
-                            <button class="buy-button">Satın Al</button>
-                        `;
-                    shoeItem.appendChild(shoeDetails);
-
-                    // Ayakkabıyı sayfaya ekle
-                    shoesContainer.appendChild(shoeItem);
-                });
-            })
-            .catch((error) => {
-                console.error('Ayakkabı bilgilerini çekerken bir hata oluştu:', error);
-            });
-    };
-    const filterShoesByBrand = (brand) => {
-        const shoesCollection = collection(db, 'Ayakkabılar');
-        const shoesContainer = document.getElementById('shoes-container');
-
-        // Sayfayı temizle
-        shoesContainer.innerHTML = '';
-
-        // Markaya göre sorgu
-        const q = brand
-            ? query(collection(db, 'Ayakkabılar'), where('marka', '==', brand))
-            : shoesCollection;
-
-        // Sorguyu gerçekleştir
-        getDocs(q)
-            .then((querySnapshot) => {
-                console.log('Firestore Verileri:', querySnapshot.docs.map(doc => doc.data()));
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-
-                    // Ayakkabıyı sayfaya ekleme kısmı (yukarıdaki kod ile aynı)
-                    const shoeItem = document.createElement('div');
-                    shoeItem.className = 'shoe-item';
-
-                    const imgElement = document.createElement('img');
-                    imgElement.src = data.imageUrl;
-                    imgElement.alt = 'Ayakkabı Resmi';
-                    imgElement.style.width = '150px';
-                    imgElement.style.height = '150px';
-                    shoeItem.appendChild(imgElement);
-
-                    const shoeDetails = document.createElement('div');
-                    shoeDetails.className = 'shoe-details';
-                    shoeDetails.innerHTML = `
-                            <p>Fiyat: ${data.fiyat}</p>
-                            <p>Marka: ${data.marka}</p>
-                            <p>Model: ${data.model}</p>
-                            <button class="buy-button">Satın Al</button>
-                        `;
-                    shoeItem.appendChild(shoeDetails);
-
-                    shoesContainer.appendChild(shoeItem);
-                });
-            })
-            .catch((error) => {
-                console.error('Ayakkabı filtrelenirken bir hata oluştu:', error);
-            });
-    };
-
- 
-    window.onload = async () => {
-        await fetchShoesData(); // Ayakkabı verilerini çek ve sayfaya ekle
-
-        document.getElementById('filterButton').addEventListener('click', () => {
-            const selectedBrand = document.querySelector('input[name="brand"]:checked');
-            const selectedBrandValue = selectedBrand ? selectedBrand.value : null;
-
-            console.log('Seçilen Marka:', selectedBrandValue);
-
-            // Seçilen markayı kullanarak Firestore sorgusu yapın
-            filterShoesByBrand(selectedBrandValue);
-        });
-    };
-</script>
-<script src="./man.js"></script>
-
 </html>
