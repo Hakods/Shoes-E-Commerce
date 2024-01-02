@@ -74,7 +74,7 @@ const fetchShoeImages = async () => {
             const shoeDetails = document.createElement('div');
             shoeDetails.className = 'shoe-details';
             shoeDetails.innerHTML = `
-                <p>Fiyat: ${shoe.fiyat}</p>
+                <p>Fiyat: ${shoe.fiyat}₺</p>
                 <p>Marka: ${shoe.marka}</p>
                 <p>Model: ${shoe.model}</p>
                 <button class="buy-button">Satın Al</button>
@@ -122,7 +122,7 @@ const filterShoesByBrand = (marka) => {
                 const shoeDetails = document.createElement('div');
                 shoeDetails.className = 'shoe-details';
                 shoeDetails.innerHTML = `
-                        <p>Fiyat: ${data.fiyat}</p>
+                        <p>Fiyat: ${data.fiyat}₺</p>
                         <p>Marka: ${data.marka}</p>
                         <p>Model: ${data.model}</p>
                         <button class="buy-button">Satın Al</button>
